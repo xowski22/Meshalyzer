@@ -15,7 +15,18 @@ pub struct Mesh {
 impl Mesh {
     #[new]
     fn new(vertices: Vec<[f32; 3]>, faces: Vec<[usize; 3]>) -> Self {
-        //TODO: implement
+        let vertices = vertices.into_iter()
+            .map(|v| Point3::new(v[0], v[1], v[2]))
+            .collect();
+
+        Mesh {
+            vertices,
+            faces,
+            normals: None,
+        }
+    }
+
+    fn compute_normals(&mut self, mesh: &Mesh) {
     }
 
 
