@@ -213,6 +213,100 @@ impl Mesh {
 
     #[staticmethod]
     fn from_obj(filename: &str) -> PyResult<Mesh> {
+        use std::io::{BufRead, BufReader};
+        use std::fs::File;
 
+        let file = File::open(filename)?;
+        let reader = BufReader::new(file);
+
+        let mut vertices = Vec::new();
+        let mut faces = Vec::new();
+        let mut normals_data = Vec::new();
+        let mut has_normals = false;
+
+        for line in reader.lines() {
+            let line = line?;
+            let parts: Vec<&str> = line.split_whitespace().collect();
+
+            if parts.is_empty(){
+                continue;
+            }
+
+            match parts[0] {
+                "v" => {
+                    if parts.len() >= 4 {
+                        let x = parts[1].parse::<f32>().unwrap_or(0.0);
+                        let y = parts[2].parse::<f32>().unwrap_or(0.0);
+                        let z = parts[3].parse::<f32>().unwrap_or(0.0);
+                        vertices.push(Point3::new(x, y, z));
+                    }
+                },
+                "vn" => {
+                    if parts.len() >= 4 {
+                        let x = parts[1].parse::<f32>().unwrap_or(0.0);
+                        let y = parts[2].parse::<f32>().unwrap_or(0.0);
+                        let z = parts[3].parse::<f32>().unwrap_or(0.0);
+                        normals_data.push(Point3::new(x, y, z));
+                        has_normals = true;
+                    }
+                },
+                "f" => {
+                    if parts.len() >= 4 {
+                        let mut face_indices = [0; 3];
+
+                        for i in 0..3 {
+                            let vertex_str = parts[i+1].split('/').next().unwrap("1");
+                            let vertex_idx = vertex_str.parse::<usize>().unwrap(1) - 1;
+                            face_indices[i] = vertex_idx;
+                        }
+
+                        faces.push(face_indices);
+                    }
+                },
+                _ => {}
+            }
+
+            let normals = if has_normals && normals_data.len() == vertices.len() {
+                Some(normals_data)
+            } else {
+                None
+            };
+
+            Ok(Mesh{
+                vertices,
+                faces,
+                normals,
+            })
+        }
+
+        #[staticmethod]
+        fn merge(mesh1: &Mesh, mesh2: &Mesh) -> Mesh {
+            let offset = mesh1.vertices.len();
+
+            let mut vertices = mesh1.vertices.clone();
+            vertices.extend(mesh2.vertices.clone());
+
+            let mut faces = mesh1.faces.clone();
+            let shifted_faces: Vec<[usize; 3]> = mesh2.faces
+                .iter()
+                .map(|face| [face[0] + offset, face[1] + offset, face[2] + offset])
+                .collect();
+            faces.extend(shifted_faces);
+
+            let normals = match (&mesh1.normals, &mesh2.normals) {
+                (Some(n1), Some(n2)) => {
+                    let mut normals = n1.clone();
+                    normals.extend(n2.clone());
+                    Some(normals)
+                },
+                _ => None,
+            };
+
+            Mesh {
+                vertices,
+                faces,
+                normals,
+            }
+        }
     }
 }
