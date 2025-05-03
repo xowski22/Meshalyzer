@@ -51,7 +51,7 @@ impl Mesh {
             }
         }
 
-        self.normmals = Some(vertex_normals);
+        self.normals = Some(vertex_normals);
         Ok(())
     }
 
@@ -64,7 +64,7 @@ impl Mesh {
     }
 
     //surface area of mesh
-    fn conpute_surface_area(&self) -> f32 {
+    fn compute_surface_area(&self) -> f32 {
         let mut area = 0.0;
 
         for face in &self.faces {
@@ -83,7 +83,8 @@ impl Mesh {
 
     //checks if mesh is watertight
     fn has_holes(&self) -> bool {
-        let mut edges: HashSet<(usize, usize), i32> = HashSet::new();
+        use std::collections::HashMap;
+        let mut edges: HashMap<(usize, usize), usize> = HashMap::new();
 
         for face in &self.faces {
             let v0 = faces[0];
@@ -100,8 +101,12 @@ impl Mesh {
                 *edges.entry((a, b)).or_insert(0) += 1;
             }
 
-            edges.value().any(|&count| count != 2)
         }
+
+        edge_count.into_iter()
+            .filter(|(_, count)| *count > 2)
+            .map(|(edge, _)| edge)
+            .collect()
     }
 
     fn scaled(&self, scale_factor: f32) -> Mesh {
