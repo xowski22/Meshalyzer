@@ -176,6 +176,22 @@ impl Mesh {
         )
     }
 
+    fn find_isolated_vertices(&self) -> Vec<usize> {
+        let mut is_connected = vec![false; self.vertices.len()];
+
+        for face in &self.faces {
+            is_connected[face[0]] = true;
+            is_connected[face[1]] = true;
+            is_connected[face[2]] = true;
+        }
+
+        is_connected.iter()
+            .enumerate()
+            .filter(|(_, &connected)| !connected)
+            .map(|(i, _)| i)
+            .collect()
+    }
+
     //saves mesh to .obj file
     fn save_obj(&self, filename: &str) -> PyResult<()> {
         use std::fs::File;
