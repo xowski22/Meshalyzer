@@ -64,7 +64,7 @@ impl TopologyAnalyzer {
         let mut boundary_edges: Vec<(usize, usize)> = self.edge_to_faces
             .iter()
             .filter(|_, faces| faces.len() == 1)
-            .map(|&edge, _| edge)
+            .map(|&edge, _| *edge)
             .collect();
 
         if boundary_edges.is_empty() {
