@@ -97,16 +97,11 @@ impl Mesh {
                 (v0.min(v2), v0.min(v2)),
             ];
 
-            for (a, b) in edges_to_add {
-                *edges.entry((a, b)).or_insert(0) += 1;
+            for edge in edges_to_add {
+                *edges.entry(edge).or_insert(0) += 1;
             }
-
         }
-
-        edge_count.into_iter()
-            .filter(|(_, count)| *count > 2)
-            .map(|(edge, _)| edge)
-            .collect()
+        edges.values().any(|&count| count == 1)
     }
 
     fn scaled(&self, scale_factor: f32) -> Mesh {
