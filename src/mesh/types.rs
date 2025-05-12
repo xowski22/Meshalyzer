@@ -105,7 +105,7 @@ impl Mesh {
     }
 
     fn scaled(&self, scale_factor: f32) -> Mesh {
-        let scaled_vertices = self.veritices
+        let scaled_vertices = self.vertices
         .iter().map(|v| v * scale_factor)
         .collect();
 

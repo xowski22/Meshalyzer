@@ -1,7 +1,6 @@
 use pyo3::prelude::*;
 mod mesh;
 mod analyzers;
-mod mesh;
 
 use mesh::types::Mesh;
 use analyzers::topology::PyTopologyAnalyzer;
