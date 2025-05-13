@@ -93,8 +93,8 @@ impl Mesh {
 
             let edges_to_add = [
                 (v0.min(v1), v0.max(v1)),
-                (v1.max(v2), v1.min(v2)),
-                (v0.min(v2), v0.min(v2)),
+                (v1.min(v2), v1.max(v2)),
+                (v0.min(v2), v0.max(v2)),
             ];
 
             for edge in edges_to_add {
@@ -106,8 +106,9 @@ impl Mesh {
 
     fn scaled(&self, scale_factor: f32) -> Mesh {
         let scaled_vertices = self.vertices
-        .iter().map(|v| v * scale_factor)
-        .collect();
+            .iter()
+            .map(|v| Point3::new(v.x * scale_factor, v.y * scale_factor, v.z * scale_factor))
+            .collect();
 
         let scaled_normals = self.normals.as_ref().map(|normals| {
             normals.clone()
